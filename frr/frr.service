@@ -1,0 +1,15 @@
+[Unit]
+Description=Free Range Routing
+After=network.target
+
+[Service]
+Type=forking
+User=frr
+Group=frr
+ExecStart=/usr/lib/frr/frr start
+ExecReload=/usr/lib/frr/frr reload
+ExecStop=/usr/lib/frr/frr stop
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
