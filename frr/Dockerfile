@@ -70,8 +70,18 @@ RUN install -m 775 -o frr -g frr -d /var/log/frr && \
     install -m 640 -o frr -g frr tools/etc/frr/daemons.conf /etc/frr/daemons.conf && \
     install -m 640 -o frr -g frr tools/etc/frr/daemons /etc/frr/daemons
 
+
+
 # Cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY daemons /etc/frr/daemons
+
+COPY start-frr.sh /start-frr.sh
+RUN chmod +x /start-frr.sh
+ENTRYPOINT ["/start-frr.sh"]
+
+ENV PATH="/usr/lib/frr:${PATH}"
 
 # Define a default command (replace this with the command to run FRR)
 CMD ["/bin/bash"]
