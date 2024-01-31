@@ -15,7 +15,28 @@ RUN apt-get update && apt-get install -y \
     protobuf-c-compiler libprotobuf-c-dev \
     libgrpc++-dev protobuf-compiler-grpc \
     libsqlite3-dev libzmq5 libzmq3-dev libpcre2-dev \
-    cmake
+    cmake \
+    tcpdump \
+    iproute2 \
+    iputils-ping \
+    traceroute \
+    mtr \
+    curl \
+    wget \
+    netcat \
+    nmap \
+    tcptraceroute \
+    dnsutils \
+    iperf3 \
+    tshark \
+    iptables \
+    net-tools \
+    bridge-utils \
+    iftop \
+    htop \
+    ethtool \
+    socat \
+    ngrep
 
 # Clone and build libyang
 RUN git clone https://github.com/CESNET/libyang.git && \
