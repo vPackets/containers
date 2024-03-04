@@ -10,13 +10,6 @@ This repository contains Dockerfiles for three custom Docker containers designed
 - **Packages**: Includes networking tools and utilities commonly used in Alpine environments.
 - **Use Case**: Ideal for lightweight, security-focused tasks requiring a minimal footprint.
 
-### 2. Building the Alpine Containerlabs
-
-These containers are used for my containerlabs topology so that I can have the same IP for my ISP-01 and ISP-02 test machines.
-
-- **Base Image**: Alpine Linux
-- **Packages**: Includes networking tools and utilities commonly used in Alpine environments.
-- **Use Case**: Ideal for lightweight, security-focused tasks requiring a minimal footprint.
 
 ### 3. Ubuntu Networking Container
 
@@ -30,54 +23,37 @@ These containers are used for my containerlabs topology so that I can have the s
 - **Packages**: Includes FRR and its dependencies.
 - **Use Case**: Designed for advanced network routing and engineering tasks, leveraging FRR's capabilities.
 
-## Building the Containers
 
-To build these containers, navigate to the respective container directory and run the Docker build command.
+### Alpine Container:
 
-### Building the Alpine Container
-
-```bash
-cd alpine-networking
-docker build -t alpine-networking .
 ```
-
-### Building the Ubuntu Container
-
-```bash
-cd ubuntu-networking
-docker build -t ubuntu-networking .
-```
-
-### Building the Ubuntu FRR Container
-
-```bash
-cd ubuntu-frr
-docker build -t ubuntu-frr .
-```
-
-## Running the Containers
-
-After building the containers, you can run them using Docker.
-
-
-## Running the Alpine Container
-
-```bash
-docker run -it --rm alpine-networking
+docker pull vpackets/alpine-tools
 ```
 
 
-## Running the Ubuntu Container
+### Alpine Containerlab:
 
-```bash
-docker run -it --rm ubuntu-networking
+```
+docker pullvpackets/alpine-tools-containerlab-isp-01
+docker pullvpackets/alpine-tools-containerlab-isp-02
 ```
 
-## Running the Ubuntu FRR Container
+### FRR Containers:
 
-```bash
-docker run -it --rm ubuntu-frr
 ```
+docker pull vpackets/ubuntu-22.04-frr
+docker pull vpackets/ubuntu-22.04-frr-deb
+```
+
+
+### Net Tools Container:
+
+```
+docker pull vpackets/net-tools
+```
+
+
+
 
 Contributions
 
