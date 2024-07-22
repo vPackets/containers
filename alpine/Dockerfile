@@ -16,6 +16,7 @@ RUN apk add --no-cache bash \
     bind-tools \
     netcat-openbsd \
     curl \
+    python3 \
     nmap
 # Set the default command to launch when starting the container
 CMD ["sh"]
