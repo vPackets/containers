@@ -18,7 +18,8 @@ RUN apk add --no-cache bash \
     curl \
     python3 \
     nmap \
-    tcpdump
+    tcpdump \
+    tshark
 # Set the default command to launch when starting the container
 CMD ["sh"]
 
