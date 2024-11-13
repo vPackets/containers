@@ -11,6 +11,7 @@ RUN apk add --no-cache bash \
     bind-tools \
     netcat-openbsd \
     curl \
+    tmux \
     nmap
 
 COPY network-config.sh /usr/local/bin/

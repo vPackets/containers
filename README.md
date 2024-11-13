@@ -49,6 +49,7 @@ docker pull vpackets/ubuntu-22.04-frr-deb
 ### Net Tools Container:
 
 ```
+docker buildx build --platform linux/amd64,linux/arm64 -t vpackets/net-tools:1.0  -t vpackets/net-tools:latest --push .
 docker pull vpackets/net-tools
 ```
 
