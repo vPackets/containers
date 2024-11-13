@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     ansible \
     curl \
     dnsutils \
-    git \ 
     hping3 \
     htop \
     httpie \
@@ -38,8 +37,29 @@ RUN apt-get update && apt-get install -y \
     wget \
     neovim \
     man-db \
+    traceroute \
+    net-tools \
+    bind9-host \
+    jq \
+    siege \
+    wrk \
+    unzip \
+    zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Install additional Python packages
+RUN pip3 install \
+    netmiko \
+    napalm \
+    nornir \
+    paramiko \
+    pyntc \
+    ncclient \
+    scapy \
+    pyyaml \
+    requests \
+    httpx
 
 # Create a non-root user
 RUN useradd -ms /bin/bash neteng && \
