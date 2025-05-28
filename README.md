@@ -59,7 +59,7 @@ docker pull vpackets/net-tools
 
 ```
 docker buildx build --platform linux/amd64,linux/arm64 -t vpackets/clus-amsterdam:1.0 -t vpackets/clus-amsterdam:latest --push .
-docker pull vpackets/clus-rome:latest
+docker pull vpackets/clus-amsterdam:latest
 ```
 
 and 
