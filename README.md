@@ -55,6 +55,19 @@ docker buildx build --platform linux/amd64,linux/arm64 -t vpackets/net-tools:1.0
 docker pull vpackets/net-tools
 ```
 
+### Cisco Live
+
+```
+docker buildx build --platform linux/amd64,linux/arm64 -t vpackets/clus-amsterdam:1.0 -t vpackets/clus-amsterdam:latest --push .
+docker pull vpackets/clus-rome:latest
+```
+
+and 
+
+```
+docker buildx build --platform linux/amd64,linux/arm64 -t vpackets/clus-rome:1.0 -t vpackets/clus-rome:latest --push .
+docker pull vpackets/clus-rome:latest
+```
 
 
 
