@@ -40,7 +40,6 @@ if ip link show eth1 > /dev/null 2>&1; then
 
     # Apply eth1 Routes
     ip route add 10.0.0.0/24 via 10.107.1.1 dev eth1 || true
-    ip route add 10.101.1.0/24 via 10.107.1.1 dev eth1 || true
     ip route add 10.1.1.0/24 via 10.107.1.1 dev eth1 || true
     ip -6 route add fc00:0::/32 via fc00:0:107:1::1 dev eth1 || true
 else
@@ -58,9 +57,10 @@ if ip link show eth2 > /dev/null 2>&1; then
     ip addr add fc00:0:107:2::2/64 dev eth2
 
     # Apply eth2 Routes
+    ip route add 10.101.1.0/24 via 10.107.1.1 dev eth1 || true
     ip route add 10.101.2.0/24 via 10.107.2.1 dev eth2 || true
     ip route add 10.200.0.0/24 via 10.107.2.1 dev eth2 || true
-    ip -6 route add fc00:0:101:2::/64 via fc00:0:107:2::1 dev eth2 || true
+    ip -6 route add fc00:0:101:1::/64 via fc00:0:107:2::1 dev eth2 || true
 else
     echo "WARNING: eth2 not detected. Skipping eth2 config."
 fi
