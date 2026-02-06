@@ -1,0 +1,72 @@
+---
+- name: Fix eth1 Network Configuration
+  hosts: containers
+  become: true
+  gather_facts: false # Speed up execution if python isn't fully ready/needed for facts
+
+  vars:
+    # Common settings could go here, but since configs are distinct, we map them below.
+    nodes:
+      rome:
+        eth1_ipv4: "10.107.1.2/24"
+        eth1_ipv6: "fc00:0:107:1::2/64"
+        gateway: "10.107.1.1"
+        gateway_v6: "fc00:0:107:1::1"
+        routes_v4:
+          - "10.0.0.0/8"
+          - "10.1.1.0/24"
+          - "10.8.0.0/16"
+        routes_v6:
+          - "fc00:0::/32"
+          - "fc00:0:101:1::/64"
+      london:
+        eth1_ipv4: "10.101.1.2/24"
+        eth1_ipv6: "fc00:0:101:1::2/64"
+        gateway: "10.101.1.1"
+        gateway_v6: "fc00:0:101:1::1"
+        routes_v4:
+          - "10.0.0.0/24"
+          - "10.107.1.0/24"
+          - "10.1.1.0/24"
+          - "40.0.0.0/24"
+          - "50.0.0.0/24"
+        routes_v6:
+          - "fc00:0::/32"
+          - "fc00:0:40::1/64"
+          - "fc00:0:50::1/64"
+
+  tasks:
+    - name: Ensure eth1 is up
+      ansible.builtin.command: ip link set eth1 up
+      changed_when: false # Idempotency check omitted for simplicity in recovery script
+
+    - name: Flush existing IPs to ensure clean slate
+      ansible.builtin.command: ip addr flush dev eth1
+      changed_when: true
+      ignore_errors: true # In case it's already empty or interface acts up temporarily
+
+    - name: Add IPv4 address
+      ansible.builtin.command: "ip addr add {{ nodes[inventory_hostname].eth1_ipv4 }} dev eth1"
+      changed_when: true
+
+    - name: Add IPv6 address
+      ansible.builtin.command: "ip addr add {{ nodes[inventory_hostname].eth1_ipv6 }} dev eth1"
+      changed_when: true
+
+    - name: Add IPv4 routes
+      ansible.builtin.command: "ip route add {{ item }} via {{ nodes[inventory_hostname].gateway }} dev eth1"
+      loop: "{{ nodes[inventory_hostname].routes_v4 }}"
+      register: route_v4_result
+      failed_when: 
+        - route_v4_result.rc != 0 
+        - "'File exists' not in route_v4_result.stderr"
+      changed_when: route_v4_result.rc == 0
+
+    - name: Add IPv6 routes
+      ansible.builtin.command: "ip -6 route add {{ item }} via {{ nodes[inventory_hostname].gateway_v6 }} dev eth1"
+      loop: "{{ nodes[inventory_hostname].routes_v6 }}"
+      register: route_v6_result
+      failed_when: 
+        - route_v6_result.rc != 0 
+        - "'File exists' not in route_v6_result.stderr"
+      changed_when: route_v6_result.rc == 0
