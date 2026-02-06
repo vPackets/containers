@@ -28,6 +28,16 @@ fi
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 # --- 3. eth1: Configuration (Rome Side) ---
+echo "Waiting for eth1 to appear..."
+for ((i=1; i<=60; i++)); do
+    if ip link show eth1 > /dev/null 2>&1; then
+        echo "eth1 found!"
+        break
+    fi
+     echo "eth1 not found, waiting ${i}/60..."
+    sleep 1
+done
+
 if ip link show eth1 > /dev/null 2>&1; then
     echo "Configuring eth1..."
     ip link set eth1 up
