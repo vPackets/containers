@@ -1,15 +1,12 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-LABEL author="Nicolas Michel"
 LABEL maintainer="nicmcl@cisco.com"
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 # =============================================================================
 # 1. Install Full Networking Stack, Troubleshooting, & Automation Tools
 # =============================================================================
-# Combined and deduplicated list of APT packages from both environments
 RUN apt-get update && apt-get install -y \
     ansible \
     bind9-host \
@@ -42,6 +39,7 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     python3 \
     python3-pip \
+    python3-venv \
     screen \
     siege \
     socat \
@@ -62,55 +60,52 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# 2. Python-based NetDevOps Tools
+# 2. Python-based Automation Tools (Handled via venv for Ubuntu 24.04 compliance)
 # =============================================================================
-# Combined PIP libraries for Nornir, Netmiko, Scapy, and API interactions
-RUN pip3 install --no-cache-dir \
-    httpx \
-    napalm \
-    ncclient \
+# Add the virtual environment to the global PATH so commands work globally
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN python3 -m venv /opt/venv && \
+    pip3 install --no-cache-dir \
     netmiko \
+    napalm \
     nornir \
     paramiko \
     pyntc \
+    ncclient \
+    scapy \
     pyyaml \
     requests \
-    scapy
+    httpx
 
 # =============================================================================
 # 3. SSH Runtime Directory
 # =============================================================================
-# Required for the SSH daemon to start properly in a container
 RUN mkdir -p /run/sshd
 
 # =============================================================================
-# 4. Users (cisco, admin, neteng)
+# 4. Users (cisco and admin for VS Code compatibility)
 # =============================================================================
-# Creating the default 'cisco' user with the 'cisco' password so your Mac's 
-# sshpass alias works instantly, alongside other standard users.
-RUN useradd -m -s /bin/bash cisco && echo "cisco:cisco" | chpasswd && usermod -aG sudo cisco \
- && useradd -m -s /bin/bash admin && echo "admin:cisco123" | chpasswd && usermod -aG sudo admin \
- && useradd -m -s /bin/bash neteng && echo "neteng:cisco123" | chpasswd && usermod -aG sudo neteng
+RUN useradd -m -s /bin/bash cisco && echo "cisco:cisco123" | chpasswd && usermod -aG sudo cisco \
+ && useradd -m -s /bin/bash admin && echo "admin:cisco123" | chpasswd && usermod -aG sudo admin
 
 # =============================================================================
 # 5. Passwordless Sudo (Essential for lab speed)
 # =============================================================================
 RUN echo "cisco ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cisco \
  && echo "admin ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/admin \
- && echo "neteng ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/neteng \
  && chmod 0440 /etc/sudoers.d/cisco \
- && chmod 0440 /etc/sudoers.d/admin \
- && chmod 0440 /etc/sudoers.d/neteng
+ && chmod 0440 /etc/sudoers.d/admin
 
 # =============================================================================
 # 6. SSH Hardening for Lab Environments
 # =============================================================================
-# Explicitly allow password auth so sshpass works, and disable root login
 RUN sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
  && sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
 
 # =============================================================================
-# 7. Start SSH Daemon in the foreground
+# 7. Start Environment
 # =============================================================================
+WORKDIR /home/admin
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D", "-e"]
