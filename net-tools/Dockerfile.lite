@@ -1,7 +1,17 @@
+# =============================================================================
+# vpackets/net-tools:lite  —  trimmed lab host (~250-300 MB vs ~660 MB full)
+# Build:
+#   docker buildx build --platform linux/amd64,linux/arm64 \
+#     -f Dockerfile.lite -t vpackets/net-tools:lite --push .
+#
+# Drops the pyATS/Genie test framework + pandas/matplotlib/ipython (data/plot).
+# Add any of them back inside a running container (venv is on PATH):
+#   pip install pyats genie pandas ipython "scapy[all]"
+# See README-LITE.md for the full rationale and measured sizes.
+# =============================================================================
 FROM ubuntu:24.04
 
-# TARGETARCH is auto-populated by `docker buildx` (amd64 / arm64) so the
-# gnmic install below resolves the right binary on multi-platform builds.
+# TARGETARCH is auto-populated by `docker buildx` (amd64 / arm64).
 ARG TARGETARCH
 
 LABEL maintainer="nicmcl@cisco.com"
@@ -9,11 +19,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 # =============================================================================
-# 1. Full Networking Stack, Troubleshooting, & Automation Tools (CCIE / SP)
+# 1. Core Networking & Troubleshooting Toolbox (CCIE / SP)
 # =============================================================================
-RUN apt-get update && apt-get install -y \
-    ansible \
-    bind9-host \
+# --no-install-recommends is the single biggest apt saver vs. the full image.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ansible-core \
     bridge-utils \
     ca-certificates \
     conntrack \
@@ -23,7 +33,6 @@ RUN apt-get update && apt-get install -y \
     fping \
     hping3 \
     htop \
-    httpie \
     iftop \
     ipcalc \
     iperf3 \
@@ -33,12 +42,10 @@ RUN apt-get update && apt-get install -y \
     iputils-tracepath \
     jq \
     lldpd \
-    man-db \
     mtr-tiny \
     ndisc6 \
     net-tools \
     netcat-openbsd \
-    neovim \
     ngrep \
     nmap \
     openssh-client \
@@ -46,52 +53,37 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
-    screen \
-    siege \
     socat \
     sudo \
     tcpdump \
-    tcptraceroute \
-    telnet \
     tmux \
     traceroute \
-    tree \
     tshark \
     unzip \
+    vim-tiny \
     wget \
-    whois \
-    wrk \
-    zip \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /usr/share/man/* /usr/share/info/*
 
 # =============================================================================
-# 1b. AI Fabric tooling — RDMA / RoCE, SRv6, multipath, PTP, NIC inspection
+# 1b. AI Fabric tooling — RDMA / RoCE, SRv6, PTP, NIC inspection (MRC study)
 # =============================================================================
-# These cover the building blocks behind OpenAI/NVIDIA/Broadcom/Intel "MRC"
-# (Multipath Reliable Connection): RoCEv2/RDMA transport, SRv6 source routing
-# (iproute2 seg6), ECMP/packet-spraying, PTP time-sync, and DCB/PFC for
-# lossless Ethernet. See README.md for the lab use cases.
-RUN apt-get update && apt-get install -y \
-    bmon \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ibverbs-utils \
     infiniband-diags \
-    iptraf-ng \
     kmod \
     linuxptp \
     lldpad \
-    nload \
     numactl \
     pciutils \
     perftest \
     rdma-core \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /usr/share/man/* /usr/share/info/*
 
 # =============================================================================
-# 2. Python Automation, Telemetry & Parsing (venv — Ubuntu 24.04 PEP 668)
+# 2. Lean Python Automation, Telemetry & Parsing (venv — PEP 668)
 # =============================================================================
-# Add the virtual environment to the global PATH so commands work globally
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN python3 -m venv /opt/venv && \
@@ -103,9 +95,8 @@ RUN python3 -m venv /opt/venv && \
     nornir-utils \
     paramiko \
     ansible-pylibssh \
-    pyntc \
     ncclient \
-    "scapy[all]" \
+    scapy \
     exabgp \
     pygnmi \
     grpcio \
@@ -115,15 +106,11 @@ RUN python3 -m venv /opt/venv && \
     ttp \
     ttp-templates \
     ciscoconfparse2 \
-    pyats \
-    genie \
     netaddr \
     jmespath \
     xmltodict \
-    pandas \
     tabulate \
     rich \
-    ipython \
     pyyaml \
     requests \
     httpx
@@ -131,8 +118,6 @@ RUN python3 -m venv /opt/venv && \
 # =============================================================================
 # 2b. gnmic — OpenConfig gNMI client (telemetry subscribe / SP streaming)
 # =============================================================================
-# The upstream installer auto-detects CPU architecture, so it works for both
-# linux/amd64 and linux/arm64 buildx targets.
 RUN bash -c "$(curl -sL https://get-gnmic.openconfig.net)"
 
 # =============================================================================

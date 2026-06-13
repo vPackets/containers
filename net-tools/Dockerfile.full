@@ -1,3 +1,9 @@
+# =============================================================================
+# vpackets/net-tools:full  —  batteries-included lab host
+# Build:
+#   docker buildx build --platform linux/amd64,linux/arm64 \
+#     -f Dockerfile.full -t vpackets/net-tools:full -t vpackets/net-tools:latest --push .
+# =============================================================================
 FROM ubuntu:24.04
 
 # TARGETARCH is auto-populated by `docker buildx` (amd64 / arm64) so the
